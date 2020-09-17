@@ -1,0 +1,70 @@
+---
+title: "3_1_Assessment_2"
+author: "Avijit Ashesh"
+date: "17/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+# set.seed(2) #if you are using R 3.5 or earlier
+set.seed(2, sample.kind="Rounding") #if you are using R 3.6 or later
+make_data <- function(n = 1000, p = 0.5, 
+				mu_0 = 0, mu_1 = 2, 
+				sigma_0 = 1,  sigma_1 = 1){
+
+y <- rbinom(n, 1, p)
+f_0 <- rnorm(n, mu_0, sigma_0)
+f_1 <- rnorm(n, mu_1, sigma_1)
+x <- ifelse(y == 1, f_1, f_0)
+  
+test_index <- createDataPartition(y, times = 1, p = 0.5, list = FALSE)
+
+list(train = data.frame(x = x, y = as.factor(y)) %>% slice(-test_index),
+	test = data.frame(x = x, y = as.factor(y)) %>% slice(test_index))
+}
+dat <- make_data()
+```
+
+```{r}
+#Set the seed to 1, then use the make_data() function defined above to generate 25 different datasets with mu_1 <- seq(0, 3, len=25). Perform logistic regression on each of the 25 different datasets (predict 1 if p>0.5) and plot accuracy (res in the figures) vs mu_1 (delta in the figures).”
+
+#Which is the correct plot?
+```
+
+
+```{r}
+set.seed(1)
+delta <- seq(0, 3, len = 25)
+res <- sapply(delta, function(d){
+	dat <- make_data(mu_1 = d)
+	fit_glm <- dat$train %>% glm(y ~ x, family = "binomial", data = .)
+	y_hat_glm <- ifelse(predict(fit_glm, dat$test) > 0.5, 1, 0) %>% factor(levels = c(0, 1))
+	mean(y_hat_glm == dat$test$y)
+})
+qplot(delta, res)
+```
+
