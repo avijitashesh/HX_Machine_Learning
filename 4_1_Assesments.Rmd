@@ -1,0 +1,109 @@
+---
+title: "4_1_Assesments"
+author: "Avijit Ashesh"
+date: "18/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r - #Provided Code}
+
+library(dslabs)
+data(tissue_gene_expression)
+dim(tissue_gene_expression$x)
+
+table(tissue_gene_expression$y)
+
+
+```
+
+```{r - #Q1}
+d <- dist(tissue_gene_expression$x)
+```
+
+```{r - #Q2}
+ind <- c(1, 2, 39, 40, 73, 74)
+as.matrix(d)[ind,ind]
+```
+
+```{r - #Q3}
+image(as.matrix(d))
+```
+
+```{r - #Q4}
+set.seed(1)
+data("heights")
+library(caret)
+library(dplyr)
+ks <- seq(1, 101, 3)
+F_1 <- sapply(ks, function(k){
+	test_index <- createDataPartition(heights$sex, times = 1, p = 0.5, list = FALSE)
+	test_set <- heights[test_index, ]
+	train_set <- heights[-test_index, ]
+	fit <- knn3(sex ~ height, data = train_set, k = k)
+	y_hat <- predict(fit, test_set, type = "class") %>% 
+		factor(levels = levels(train_set$sex))
+	F_meas(data = y_hat, reference = test_set$sex)
+})
+plot(ks, F_1)
+ks
+F_1
+max(F_1)
+# At what value of k does the max occur?
+ks[which.max(F_1)]
+```
+
+```{r - #Provided Code}
+library(dslabs)
+library(caret)
+data("tissue_gene_expression")
+```
+
+```{r - #Q2}
+fit <- knn3(y ~ x, data=trainset_gene, k=4)
+y_hat <- predict(fit, testset_gene, type = "class") %>%
+  factor(levels = levels(trainset_gene$y))
+
+F_meas(data=y_hat, reference=testset_gene$y)
+
+confusionMatrix(y_hat, testset_gene$y)
+```
+
+```{r}
+set.seed(1)
+library(caret)
+y <- tissue_gene_expression$y
+x <- tissue_gene_expression$x
+train_index <- createDataPartition(y, list = FALSE)
+sapply(seq(1, 11, 2), function(k){
+	fit <- knn3(x[train_index,], y[train_index], k = k)
+	y_hat <- predict(fit, newdata = data.frame(x=x[-train_index,]),
+				type = "class")
+mean(y_hat == y[-train_index])
+})
+```
+
