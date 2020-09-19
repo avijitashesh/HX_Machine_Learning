@@ -1,0 +1,110 @@
+---
+title: "6_2_Assessments"
+author: "Avijit Ashesh"
+date: "19/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+```{r}
+library(tidyverse)
+library(dslabs)
+library(lubridate)
+data("movielens")
+```
+
+
+```{r}
+movielens %>% group_by(year) %>%
+  summarize(n_ratings = n()) %>%
+  print(n=82) %>%
+  ggplot(aes(year, sqrt(n_ratings))) +
+  geom_line()
+```
+
+```{r}
+movielens %>% filter(title=="Shawshank Redemption, The") %>%
+  summarize(mean_rating = mean(rating))
+
+```
+
+```{r}
+movielens %>% filter(title=="Forrest Gump") %>%
+  summarize(n_ratings_per_year = n()/(2018-1994))
+```
+
+
+```{r}
+movielens %>% filter(year >= 1993) %>%
+  group_by(movieId) %>%
+  mutate(n_ratings_per_year = n()/(2018-1994)) %>%
+  mutate(mean_rating = mean(rating)) %>% 
+  ggplot(aes(n_ratings_per_year, mean_rating)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+
+```{r}
+
+movielens <- mutate(movielens, date = as_datetime(timestamp))
+
+movielens %>% mutate(date = round_date(date, unit = "week")) %>%
+  group_by(date) %>%
+  summarize(rating = mean(rating)) %>%
+  ggplot(aes(date, rating)) +
+  geom_point() +
+  geom_smooth()
+```
+
+
+```{r}
+movielens %>% group_by(genres) %>% 
+  filter(length(rating) >= 1000) %>%
+  summarize(avg = mean(rating), sd = sd(rating)) %>%
+  filter(avg < 3.5) %>%
+  ggplot(aes(x=genres, ymin=avg-sd, ymax=avg+sd)) + 
+  geom_errorbar()
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
