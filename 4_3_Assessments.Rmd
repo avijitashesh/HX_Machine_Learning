@@ -48,6 +48,14 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 fit_lda <- train(x, y, method = "lda")
 fit_lda$results["Accuracy"]
 ```
+```{r}
+t(fit_lda$finalModel$means) %>% data.frame() %>%
+	mutate(predictor_name = rownames(.)) %>%
+	ggplot(aes(cerebellum, hippocampus, label = predictor_name)) +
+	geom_point() +
+	geom_text() +
+	geom_abline()
+```
 
 ```{r}
 library(dslabs)      
@@ -59,5 +67,52 @@ ind <- which(tissue_gene_expression$y %in% c("cerebellum", "hippocampus"))
 y <- droplevels(tissue_gene_expression$y[ind])
 x <- tissue_gene_expression$x[ind, ]
 x <- x[, sample(ncol(x), 10)]
+```
+
+```{r}
+fit_qda <- train(x, y, method = "qda")
+fit_qda$results["Accuracy"]
+```
+
+```{r}
+t(fit_qda$finalModel$means) %>% data.frame() %>%
+	mutate(predictor_name = rownames(.)) %>%
+	ggplot(aes(cerebellum, hippocampus, label = predictor_name)) +
+	geom_point() +
+	geom_text() +
+	geom_abline()
+```
+```{r}
+fit_lda <- train(x, y, method = "lda", preProcess = "center")
+fit_lda$results["Accuracy"]
+t(fit_lda$finalModel$means) %>% data.frame() %>%
+	mutate(predictor_name = rownames(.)) %>%
+	ggplot(aes(predictor_name, hippocampus)) +
+	geom_point() +
+	coord_flip()
+	
+d <- apply(fit_lda$finalModel$means, 2, diff)
+ind <- order(abs(d), decreasing = TRUE)[1:2]
+plot(x[, ind], col = y)
+```
+
+```{r}
+
+library(dslabs)      
+library(caret)
+data("tissue_gene_expression")
+           
+# set.seed(1993) # if using R 3.5 or earlier
+set.seed(1993, sample.kind="Rounding") # if using R 3.6 or later
+y <- tissue_gene_expression$y
+x <- tissue_gene_expression$x
+x <- x[, sample(ncol(x), 10)]
+
+```
+
+```{r}
+fit_lda <- train(x, y, method = "lda")
+fit_lda$results["Accuracy"]
+
 ```
 

@@ -1,0 +1,87 @@
+---
+title: "5_2_Assessment"
+author: "Avijit Ashesh"
+date: "18/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+library(caret)
+library(dslabs)
+set.seed(1991)
+data("tissue_gene_expression")
+    
+fit <- with(tissue_gene_expression, 
+                train(x, y, method = "rpart",
+                      tuneGrid = data.frame(cp = seq(0, 0.1, 0.01))))
+    
+ggplot(fit)
+```
+
+
+```{r}
+set.seed(1991)
+data("tissue_gene_expression")
+    
+fit_rpart <- with(tissue_gene_expression, 
+                      train(x, y, method = "rpart",
+                            tuneGrid = data.frame(cp = seq(0, 0.10, 0.01)),
+                            control = rpart.control(minsplit = 0)))
+ggplot(fit_rpart)
+confusionMatrix(fit_rpart)
+```
+
+
+```{r}
+set.seed(1991)
+library(randomForest)
+fit <- with(tissue_gene_expression, 
+                train(x, y, method = "rf", 
+                      nodesize = 1,
+                      tuneGrid = data.frame(mtry = seq(50, 200, 25))))
+    
+ggplot(fit)
+```
+
+
+```{r}
+imp <- varImp(fit)
+imp
+```
+
+
+```{r}
+tree_terms <- as.character(unique(fit_rpart$finalModel$frame$var[!(fit_rpart$finalModel$frame$var == "<leaf>")]))
+tree_terms
+
+data_frame(term = rownames(imp$importance), 
+			importance = imp$importance$Overall) %>%
+	mutate(rank = rank(-importance)) %>% arrange(desc(importance)) %>%
+	filter(term %in% tree_terms)
+
+```
+
